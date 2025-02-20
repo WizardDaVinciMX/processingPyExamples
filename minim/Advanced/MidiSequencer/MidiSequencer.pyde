@@ -138,7 +138,6 @@ def draw():
 
   # just draw all the Blips!
   for blip in blips:
-    print("Aca")
     blip.draw()  
 
 # the Instrument implementation we use for playing notes

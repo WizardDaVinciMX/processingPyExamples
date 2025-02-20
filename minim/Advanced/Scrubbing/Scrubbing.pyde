@@ -10,35 +10,43 @@
   * visit http:#code.compartmental.net/minim/
   """
 
-add_library("ddf.minim.*
+add_library("minim")
+from button import Play, Rewind, Forward 
 
-Minim minim
-AudioPlayer song
-Play play
-Rewind rewind
-Forward ffwd
+minim = None
+song = None
+play = None
+rewind = None
+ffwd = None
 
-def setup()
-{
+def setup():
+  global song
+  global play
+  global rewind
+  global ffwd
+
   size(512, 200, P3D)
   minim = Minim(this)
   # load a file from the data folder, use a sample buffer of 1024 samples
   song = minim.loadFile("fair1939.wav", 512)
   # buttons for control
-  play = Play(width/2 - 50, 130, 20, 10)
-  rewind = Rewind(width/2, 130, 20, 10)
-  ffwd = Forward(width/2 + 50, 130, 20, 10)
+  play = Play(song, width/2 - 50, 130, 20, 10)
+  rewind = Rewind(song, width/2, 130, 20, 10)
+  ffwd = Forward(song, width/2 + 50, 130, 20, 10)
 
 
-def draw()
-{
+def draw():
+  global song
+  global play
+  global rewind
+  global ffwd
+
   background(0)
   # draw the wave form
   # this wav is MONO, so we only need the left channel, 
   # though we could have used the right channel and gotten the same values
   stroke(255)
-  for (i = 0 i < song.bufferSize() - 1  i+=1)
- :
+  for i in range(0, song.bufferSize() - 1):
     line(i, 50 - song.left.get(i)*50, i+1, 50 - song.left.get(i+1)*10)
   
   # draw the position in the song
@@ -56,16 +64,13 @@ def draw()
   ffwd.draw()
 
 
-def mousePressed()
-{
+def mousePressed():
   play.mousePressed()
   rewind.mousePressed()
   ffwd.mousePressed()
 
 
-def mouseReleased()
-{
+def mouseReleased():
   play.mouseReleased()
   rewind.mouseReleased()
   ffwd.mouseReleased()
-

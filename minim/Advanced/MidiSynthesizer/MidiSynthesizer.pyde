@@ -1,4 +1,4 @@
-"""*
+"""
     This example demonstrates how you might use the note sequencing abilities 
     of Minim to drive a JavaSound Synthesizer. You might want to take this 
     approach if you want to tightly couple visuals and music, like this example does,
@@ -13,22 +13,22 @@
     For more information about Minim and additional features, visit http:#code.compartmental.net/minim/
     <p>
     Author: Damien Di Fede  
-  """
+"""
   
-add_library("ddf.minim.*
-add_library("ddf.minim.ugens.*
+add_library("minim")
+#add_library("ddf.minim.ugens.*
 
 # this package is where we get our Synthesizer from
-add_library("javax.sound.midi.*
+from javax.sound.midi import *
 
 # two things we need from Minim for note playing.  
-Minim       minim
-AudioOutput out
+minim = None
+out = None
 
 # what we need from JavaSound for sound making.
-Synthesizer   synth
+synth = None
 # the MidiChannels of the synth.
-MidiChannel[] channels
+channels = None
 
 # constants to refer to the channels we are going to put our instruments on.
 PIANO = 0
@@ -36,7 +36,7 @@ BASS  = 1
 
 # the Blip class is what handles our visuals.
 # see below the draw function for the definition.
-ArrayList<Blip> blips
+blips = None
 
 # the Instrument implementation we use for playing notes
 # we have to explicitly specify the Instrument interface
@@ -44,54 +44,41 @@ ArrayList<Blip> blips
 # in javax.sound.midi. We could adef this by importing
 # only the classes we need from javax.sound.midi, 
 # rather than importing everything.
-class MidiSynth implements ddf.minim.ugens.Instrument
-{
-          channel
-          noteNumber
-          noteVelocity
-  Blip        blip
-  
-  MidiSynth( channelIndex, String noteName, vel )
- :
-    channel = channelIndex
+class MidiSynth(Instrument): 
+  def __init__(self, channelIndex, noteName, vel):
+    super().__init__()
+    self.channel = channelIndex
     # to make our sequence code more readable, we use note names.
     # and then convert the note name to a Midi note value here.
-    noteNumber = (int)Frequency.ofPitch(noteName).asMidiNote()
+    self.noteNumber = int(Frequency.ofPitch(noteName).asMidiNote())
     # similarly, we specify velocity as a [0,1] volume and convert to [1,127] here.
-    noteVelocity = 1 + int(126*vel) 
+    self.noteVelocity = 1 + int(126*vel) 
+    self.blip = None
   
-  
-  def noteOn( dur )
- :
+  def noteOn( self, dur ):
     # make visual
-    color c = color( 0, 200, 64, 255*(noteVelocity/127.0) )
-    if ( channel == BASS )
-   :
+    c = color( 0, 200, 64, 255*(noteVelocity/127.0) )
+    if self.channel == BASS:
       c = color( 200, 32, 0, 255*(noteVelocity/127.0) )
-    
-    blip = Blip( c, map(noteNumber, 30, 75, height, 0), 200*dur )
+    self.blip = Blip( c, map(noteNumber, 30, 75, height, 0), 200*dur )
     blips.add( blip )
     
     # make sound
     channels[channel].noteOn( noteNumber, noteVelocity )
-  
-  
-  def noteOff()
- :
+    
+  def noteOff(self):
     channels[channel].noteOff( noteNumber )
     blips.remove( blip )
   
-
-
 # just a little helper function to reduce how much typing is required
 # for the sequence code below.
-def note( time, duration, channelIndex, String noteName, velocity )
-{
+def note( time, duration, channelIndex, noteName, velocity ):
   out.playNote( time, duration, MidiSynth( channelIndex, noteName, velocity ) )
 
+def setup():
+  global minim
+  global out
 
-def setup()
-{
   size( 640, 480 )
   
   minim = Minim(this)
@@ -100,8 +87,7 @@ def setup()
   # try to get the default synthesizer from JavaSound
   # if it fails, we pra message to the console
   # and don't do any of the sequencing.
-  try
- :
+  try:
     synth = MidiSystem.getSynthesizer()
     synth.open()
     # get all the channels for the synth
@@ -152,48 +138,35 @@ def setup()
     note( 13.5, 0.25, PIANO, "B4", 1 )
     
     # and the bass part
-    for( i = 0 i < 8 +=1i )
-   :
+    for i in range(0, 8):
       note( i, 0.25, BASS, "C2", 0.6 )
       note( i+0.5, 0.25, BASS, "C2", 0.8 )
-    
-    
-    for( i = 8 i < 12 +=1i )
-   :
+        
+    for i in range(8, 12):
       note( i, 0.25, BASS, "F2", 0.6 )
       note( i+0.5, 0.25, BASS, "F2", 0.8 )
     
-    
-    for( i = 12 i < 16 +=1i )
-   :
+    for i in range(12, 16):
       note( i, 0.25, BASS, "G2", 0.6 )
       note( i+0.5, 0.25, BASS, "G2", 0.8 )
-        
-    
+
     out.resumeNotes() 
   
-  catch( MidiUnavailableException ex )
- :
+  except MidiUnavailableException:
     # oops there wasn't one.
     println( "No default synthesizer, sorry bud." )
-   
-  
+
   # and we need to make our Blip list
-  blips = ArrayList<Blip>()
+  blips = list()
   # and set our drawing preferences
   rectMode( CENTER )
 
-
-def draw()
-{
+def draw():
   background( 20 )
   
   # just draw all the Blips!
-  for( i = 0 i < blips.size() +=1i )
- :
-    blips.get(i).draw()  
-  
-
+  for blip in blips:
+    blip.draw()  
 
 # this class stores data for drawing one Blip on the screen.
 # in this example, each Blip directly corresponds to a note
@@ -203,25 +176,13 @@ def draw()
 # and the duration is represented by the width.
 # The color is used to differentiate between the two
 # midi instruments being used in the example.
-class Blip
-{
-  # color
-  color shade
-  # vertical position on screen
-  position
-  # width
-  size
-  
-  Blip( color c, p, s )
- :
-    shade = c
-    position = p
-    size = s
-  
-  
-  def draw()
- :
-    fill( shade )
+class Blip:
+  def __init__(self, c, p, s ):
+    self.shade = c
+    self.position = p
+    self.size = s
+
+  def draw(self):
+    fill( self.shade )
     rect( width/2, position, size, 10 )
   
-
