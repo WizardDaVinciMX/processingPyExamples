@@ -7,15 +7,16 @@ grayscale version. Uses un-wrapped OpenCV cvtColor() function.
 
 """
 
-add_library("gab.opencv.*
+add_library("opencv_processing")
 # Import the OpenCV Improc class,
 # it has the cvtColor() function we need.
-add_library("org.opencv.imgproc.Imgproc
+from org.opencv.imgproc import Imgproc
 
-OpenCV opencv
-PImage colorImage, grayImage
 
 def setup():
+  global opencv
+  global colorImage, grayImage
+
   colorImage = loadImage("flashlight.jpg")
   opencv = OpenCV(this, colorImage)  
   size(1080, 720)
@@ -30,6 +31,9 @@ def setup():
 
 
 def draw():
+  global colorImage
+  global grayImage
+
   background(0)
   pushMatrix()
   scale(0.5)
