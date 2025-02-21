@@ -1,60 +1,70 @@
-"""*
- * MultipleColorTracking
- * Select 4 colors to track them separately
- *
- * It uses the OpenCV for Processing library by Greg Borenstein
- * https:#github.com/atduskgreg/opencv-processing
- *
- * @author: Jordi Tost (@jorditost)
- * @url: https:#github.com/jorditost/ImageFiltering/tree/master/MultipleColorTracking
- *
- * University of Applied Sciences Potsdam, 2014
- *
- * Instructions:
- * Press one numerical key [1-4] and click on one color to track it
- """
- 
-add_library("gab.opencv.*
-add_library("processing.video.*
-add_library("java.awt.Rectangle
+"""
+ MultipleColorTracking
+ Select 4 colors to track them separately
 
-Capture video
-OpenCV opencv
-PImage src
-ArrayList<Contour> contours
+ It uses the OpenCV for Processing library by Greg Borenstein
+ https:#github.com/atduskgreg/opencv-processing
+
+ @author: Jordi Tost (@jorditost)
+ @url: https:#github.com/jorditost/ImageFiltering/tree/master/MultipleColorTracking
+
+ University of Applied Sciences Potsdam, 2014
+
+ Instructions:
+ Press one numerical key [1-4] and click on one color to track it
+"""
+ 
+add_library("opencv_processing")
+add_library("video")
+from java.awt import Rectangle
+
+video = None
+opencv = None
+src = None
+contours = None
 
 # <1> Set the range of Hue values for our filter
 #ArrayList<Integer> colors
 maxColors = 4
-int[] hues
-int[] colors
+hues = None
+colors = None
 rangeWidth = 10
 
-PImage[] outputs
+outputs = [None] * maxColors
 
 colorToChange = -1
 
 def setup():
+  global video
+  global opencv
+  global contours
+  global colors
+  global hues
+  global outputs
+
   video = Capture(this, "pipeline:autovideosrc")
   opencv = OpenCV(this, video.width, video.height)
-  contours = ArrayList<Contour>()
+  contours = list()
   
   size(830, 480, P2D)
   
   # Array for detection colors
-  colors = int[maxColors]
-  hues = int[maxColors]
+  colors = [0] * maxColors
+  hues   = [0] * maxColors
   
-  outputs = PImage[maxColors]
+  outputs = [None] * maxColors
   
   video.start()
 
 
 def draw():
-  
+  global video
+  global opencv
+  global outputs
+
   background(150)
   
-  if (video.available()):
+  if video.available():
     video.read()
   
 
@@ -72,8 +82,8 @@ def draw():
   
   # Show images
   image(src, 0, 0)
-  for (i=0 i<outputs.length i+=1):
-    if (outputs[i] != null):
+  for i in range(0, len(outputs)):
+    if outputs[i] != None:
       image(outputs[i], width-src.width/4, i*src.height/4, src.width/4, src.height/4)
       
       noStroke()
@@ -87,9 +97,9 @@ def draw():
   stroke(255)
   fill(255)
   
-  if (colorToChange > -1):
-    text("click to change color " + colorToChange, 10, 25)
-   else:
+  if colorToChange > -1:
+    text("click to change color " + str(colorToChange), 10, 25)
+  else:
     text("press key [1-4] to select color", 10, 25)
   
   
@@ -101,10 +111,13 @@ def draw():
 ###########
 
 def detectColors():
+  global hues
+  global outputs
+
+  for i in range(0, len(hues)):
     
-  for (i=0 i<hues.length i+=1):
-    
-    if (hues[i] <= 0) continue
+    if hues[i] <= 0:
+      continue
     
     opencv.loadImage(src)
     opencv.useColor(HSB)
@@ -132,8 +145,7 @@ def detectColors():
   
   # <7> Find contours in our range image.
   #     Passing 'true' sorts them by descending area.
-  if (outputs[0] != null):
-    
+  if outputs[0] != None:
     opencv.loadImage(outputs[0])
     contours = opencv.findContours(true,true)
   
@@ -141,12 +153,11 @@ def detectColors():
 
 def displayContoursBoundingBoxes():
   
-  for (i=0 i<contours.size() i+=1):
+  for i in range(0, len(contours)):
+    contour = contours[i]
+    r = contour.getBoundingBox()
     
-    Contour contour = contours.get(i)
-    Rectangle r = contour.getBoundingBox()
-    
-    if (r.width < 20 || r.height < 20)
+    if r.width < 20 or r.height < 20:
       continue
     
     stroke(255, 0, 0)
@@ -161,37 +172,37 @@ def displayContoursBoundingBoxes():
 ###########
 
 def mousePressed():
+  global hues
+  global colors
+
+  if colorToChange > -1:
     
-  if (colorToChange > -1):
-    
-    color c = get(mouseX, mouseY)
-    println("r: " + red(c) + " g: " + green(c) + " b: " + blue(c))
+    c = get(mouseX, mouseY)
+    println("r: " + str(red(c)) + " g: " + str(green(c)) + " b: " + str(blue(c)))
    
-    hue = int(map(hue(c), 0, 255, 0, 180))
+    h = int(map(hue(c), 0, 255, 0, 180))
     
     colors[colorToChange-1] = c
-    hues[colorToChange-1] = hue
+    hues[colorToChange-1] = h
     
-    println("color index " + (colorToChange-1) + ", value: " + hue)
+    println("color index " + str(colorToChange-1) + ", value: " + str(h))
   
 
 
 def keyPressed():
-  
-  if (key == '1'):
+  global colorToChange
+
+  if    key == '1':
     colorToChange = 1
-    
-   else if (key == '2'):
+  elif key == '2':
     colorToChange = 2
-    
-   else if (key == '3'):
+  elif key == '3':
     colorToChange = 3
-    
-   else if (key == '4'):
+  elif key == '4':
     colorToChange = 4
   
 
-
 def keyReleased():
-  colorToChange = -1 
+  global colorToChange
 
+  colorToChange = -1 

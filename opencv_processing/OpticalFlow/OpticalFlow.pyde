@@ -1,10 +1,11 @@
-add_library("gab.opencv.*
-add_library("processing.video.*
+add_library("opencv_processing")
+add_library("video")
 
-OpenCV opencv
-Movie video
 
 def setup():
+  global opencv
+  global video
+
   size(1136, 320)
   video = Movie(this, "sample1.mov")
   opencv = OpenCV(this, 568, 320)
@@ -15,7 +16,7 @@ def setup():
 def draw():
   background(0)
 
-  if (video.width == 0 || video.height == 0)
+  if video.width == 0 or video.height == 0:
     return
 
   opencv.loadImage(video)
@@ -26,7 +27,7 @@ def draw():
   stroke(255, 0, 0)
   opencv.drawOpticalFlow()
 
-  PVector aveFlow = opencv.getAverageFlow()
+  aveFlow = opencv.getAverageFlow()
   flowScale = 50
 
   stroke(255)
@@ -34,6 +35,5 @@ def draw():
   line(video.width/2, video.height/2, video.width/2 + aveFlow.x*flowScale, video.height/2 + aveFlow.y*flowScale)
 
 
-def movieEvent(Movie m):
+def movieEvent(m):
   m.read()
-

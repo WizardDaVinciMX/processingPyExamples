@@ -1,16 +1,16 @@
-add_library("gab.opencv.*
+add_library("opencv_processing")
 
-add_library("org.opencv.imgproc.Imgproc
-
-OpenCV opencv
-PImage  img, opened, closed, tophat
+from org.opencv.imgproc import Imgproc
 
 def setup():
+  global opencv
+  global img, opened, closed, tophat
+
   img = loadImage("test.jpg")
   size(1280, 720)
 
   opencv = OpenCV(this, img)
-  PImage snap = opencv.getSnapshot()
+  snap = opencv.getSnapshot()
  
   opencv.open(16)
   opened = opencv.getSnapshot()
