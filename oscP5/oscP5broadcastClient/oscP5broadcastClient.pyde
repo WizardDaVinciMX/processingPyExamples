@@ -18,16 +18,20 @@ def setup():
   size(400,400)
   frameRate(25)
   
-  """ create a instance of oscP5. 
-   * 12000 is the port number you are listening for incoming osc messages.
+  """ 
+   create a instance of oscP5. 
+   12000 is the port number you are listening for incoming osc messages.
    """
   oscP5 = OscP5(this, 12000)
   
-  """ create a NetAddress. a NetAddress is used when sending osc messages
-   * with the oscP5.send method.
-   """
+  """ 
+   create a NetAddress. a NetAddress is used when sending osc messages
+   with the oscP5.send method.
+  """
   
-  """ the address of the osc broadcast server """
+  """ 
+    the address of the osc broadcast server
+  """
   myBroadcastLocation = NetAddress("127.0.0.1",32000)
 
 

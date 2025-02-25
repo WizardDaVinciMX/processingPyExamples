@@ -1,10 +1,11 @@
-add_library("gab.opencv.*
+add_library("opencv_processing")
 
-OpenCV opencv
-PImage threshold, blur, adaptive, gray
 
 def setup():
-  PImage img = loadImage("test.jpg")
+  global opencv
+  global threshold, blur, adaptive, gray
+
+  img = loadImage("test.jpg")
   size(1080, 720)
 
   # By default, OpenCV for Processing works with a gray
@@ -34,6 +35,8 @@ def setup():
 
 
 def draw():
+  global threshold
+
   scale(0.5)
   image(threshold, 0, 0)
   image(blur, threshold.width,0)
